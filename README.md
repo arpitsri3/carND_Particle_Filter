@@ -1,3 +1,14 @@
+Note On the Project:
+
+I encountered some weird issues while doing the project.
+1. At lower particle number value , say around 45, I got a 'Your Y error exceeded the max'.
+2. I wasn't aware at first that there's a 'dist' function inside the helper function file and I kept trying to use the standard 'coordinate formula' of algebra (which is anyway used in the dist function' but I kept getting random issues like - weights got stuck at 0, X error exceeded the max, and overall failure. However, when I used the dist function from the helper functions the particle filter worked fine. I am baffled by this and I don't know what i am missing out in the direct formula application. Thus, I have left the formula implementation in comments.
+3. I also faced some errors with random initializations, garbage values and vectors that needed clearing before re-use. I guess I am just lousy at C++. 
+
+I have put in a snapshot of the final ERROR values in the 'Visualization' folder. 
+![alt text](https://github.com/arpitsri3/CARND_P8/blob/master/Visualization/Vis1.PNG)
+
+
 # Overview
 This repository contains all the code needed to complete the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
 
