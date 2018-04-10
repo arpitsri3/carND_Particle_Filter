@@ -1,4 +1,15 @@
-Note On the Project:
+Update 10/4/2018:
+
+Here are the changes to the code:
+1. While calculating exponent - Added brackets to separate the addition terms : "(((x_obs - mu_x)*(x_obs - mu_x))/(2 * std_x *std_x)) + (((y_obs - mu_y)*(y_obs - mu_y))/(2 * std_y *std_y));" , instead of "((x_obs - mu_x)*(x_obs - mu_x))/(2 * std_x *std_x)) + (((y_obs - mu_y)*(y_obs - mu_y))/(2 * std_y *std_y);" . The compiler was calculating the the sum for the middle terms and doing division later. Frankly, I didn't notice it before and I am surprised that the code even worked yesterday, considering the exponent was being calculated wrong.
+
+2. While transformation of values I was accidentally assigning ID as "observations[i].id;" instead of "observations[j].id;". Frankly, again I am surprised that the code even worked yesterday, considering the IDs of the transformations were all wrong.
+
+I have put in again, a snapshot of the final ERROR values in the 'Visualization' folder. 
+![alt text](https://github.com/arpitsri3/CARND_P8/blob/master/Visualization/Vis2.PNG)
+
+
+Note On the Project (09/04/2018):
 
 I encountered some weird issues while doing the project.
 1. At lower particle number value , say around 45, I got a 'Your Y error exceeded the max'.
