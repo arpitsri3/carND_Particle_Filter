@@ -130,7 +130,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   3.33
 	//   http://planning.cs.uiuc.edu/node99.html
     
-    double std_x = std_landmark[0];
+double std_x = std_landmark[0];
 	double std_y = std_landmark[1];
     
 	//cout<<"Point1"<<"\n";
@@ -138,18 +138,29 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     //Iterating over all the particles
 	for(int i = 0; i<num_particles; i++){
      
-	 //cout<<"Point2"<<"\n";
+       //Transformation from vehicle to map co-ordinates
+	   vector<LandmarkObs> transformed;
+	   //Using equation 3.33 for combining translation and rotation
+
+	   for (int j=0; j<observations.size(); j++){
+		   LandmarkObs obs;
+		   obs.id = observations[j].id;
+		   obs.x = particles[i].x +(cos(particles[i].theta)*observations[j].x) - (sin(particles[i].theta)*observations[j].y);
+		   obs.y = particles[i].y +(sin(particles[i].theta)*observations[j].x) + (cos(particles[i].theta)*observations[j].y);
+		   transformed.push_back(obs); 
+	   }
 	 
 	   //Create a list of landmarks near for the particle
 	   vector<LandmarkObs> near;
-	   double x1, x2, y1, y2;//, difference;
+	   //double x1, x2, y1, y2;//, difference;
        for(int j=0; j<map_landmarks.landmark_list.size(); j++){
-           x1 = map_landmarks.landmark_list[j].x_f;
-		   x2 = particles[i].x;
-		   y1 = map_landmarks.landmark_list[j].y_f;
-		   y2 = particles[i].y;
+           //x1 = map_landmarks.landmark_list[j].x_f;
+		   //x2 = particles[i].x;
+		   //y1 = map_landmarks.landmark_list[j].y_f;
+		   //y2 = particles[i].y;
 		   //difference = sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
-		   if(dist(x1,y1,x2,y2) < sensor_range){
+		   double distance = (map_landmarks.landmark_list[j].x_f, map_landmarks.landmark_list[j].y_f, particles[i].x, particles[i].y);
+		   if(distance < sensor_range){
 			   LandmarkObs mark;
 			   mark.id = map_landmarks.landmark_list[j].id_i;
 			   mark.x = map_landmarks.landmark_list[j].x_f;
@@ -158,29 +169,12 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		   }
 	   }
 	 
-       //Transformation from vehicle to map co-ordinates
-	   vector<LandmarkObs> transformed;
-	   //Using equation 3.33 for combining translation and rotation
-	    
-	   //cout<<"Point3"<<"\n";
 
-	   for (int j=0; j<observations.size(); j++){
-		   LandmarkObs obs;
-		   obs.id = observations[i].id;
-		   obs.x = particles[i].x +(cos(particles[i].theta)*observations[j].x) - (sin(particles[i].theta)*observations[j].y);
-		   obs.y = particles[i].y +(sin(particles[i].theta)*observations[j].x) + (cos(particles[i].theta)*observations[j].y);
-		   transformed.push_back(obs); 
-	   }
-       
-	   //cout<<"Point4"<<"\n";
-
-       //cout<<"Point5"<<"\n";
 
 	   //call dataAssociation function to Find the predicted measurement that is closest to each observed measurement and assign the 
 	   //observed measurement to this particular landmark.
        dataAssociation(near, transformed);
-       
-	   //cout<<"Point6"<<"\n";
+
 
 	   //Calculate parameters for estabilishing associations for the particle
 	   vector<int> associations;
@@ -193,22 +187,17 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		   associations.push_back(near[transformed[j].id].id);
 	   }
 
-       //cout<<"Point7"<<"\n";
 
 	   SetAssociations(particles[i], associations, sense_x, sense_y);
 
-       //cout<<"Point8"<<"\n";
 
 	   //calculate normalization term
        double gauss_norm = 1/(2 * M_PI * std_x * std_y);
-
-	   //cout<<gauss_norm<<" "<<std_x<<" "<<std_y;
-
        //Taking product of the likelihoods over all measurements
        
 	   //Initializing the particle's weight to 1.0
-	   particles[i].weight = 1.0;
-	   for(int j=0; j<transformed.size(); j++){
+	   double wt = 1.0;
+	   for(int j=0; j<observations.size(); j++){
 		   double x_obs = transformed[j].x;
 		   double mu_x = near[transformed[j].id].x;
 		   double y_obs = transformed[j].y;
@@ -217,16 +206,11 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		   //cout<<x_obs<<","<<mu_x<<" "<<y_obs<<" "<<mu_y<<endl;
 
            //calculate exponent
-           double exponent= ((x_obs - mu_x)*(x_obs - mu_x))/(2 * std_x *std_x) + ((y_obs - mu_y)*(y_obs - mu_y))/(2 * std_y *std_y);
-           
-		   //cout<<exponent<<endl;
-
-		   //calculate weight using normalization terms and exponent
-           double weight= gauss_norm * exp(-exponent);
+           double exponent= (((x_obs - mu_x)*(x_obs - mu_x))/(2 * std_x *std_x)) + (((y_obs - mu_y)*(y_obs - mu_y))/(2 * std_y *std_y));
+           wt*= gauss_norm * exp(-(exponent));
 
 		   //cout<<weight<<endl;
 
-		   particles[i].weight *= weight;
            transformed.clear();
 		   near.clear();
 	   }
@@ -234,8 +218,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	   //cout<<particles[i].weight<<endl;
 
 	   //Updating the weight in the weights array for the particle
-	   weights[i] = particles[i].weight;
+	   particles[i].weight = wt;
+	   weights[i] = wt;
 	}
+
 }
 
 void ParticleFilter::resample() {
