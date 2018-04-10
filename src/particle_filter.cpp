@@ -152,15 +152,14 @@ double std_x = std_landmark[0];
 	 
 	   //Create a list of landmarks near for the particle
 	   vector<LandmarkObs> near;
-	   //double x1, x2, y1, y2;//, difference;
+	   double x1, x2, y1, y2;//, difference;
        for(int j=0; j<map_landmarks.landmark_list.size(); j++){
-           //x1 = map_landmarks.landmark_list[j].x_f;
-		   //x2 = particles[i].x;
-		   //y1 = map_landmarks.landmark_list[j].y_f;
-		   //y2 = particles[i].y;
-		   //difference = sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
-		   double distance = (map_landmarks.landmark_list[j].x_f, map_landmarks.landmark_list[j].y_f, particles[i].x, particles[i].y);
-		   if(distance < sensor_range){
+           x1 = map_landmarks.landmark_list[j].x_f;
+		   x2 = particles[i].x;
+		   y1 = map_landmarks.landmark_list[j].y_f;
+		   y2 = particles[i].y;
+		   
+		   if(dist(x1,y1,x2,y2) < sensor_range){
 			   LandmarkObs mark;
 			   mark.id = map_landmarks.landmark_list[j].id_i;
 			   mark.x = map_landmarks.landmark_list[j].x_f;
